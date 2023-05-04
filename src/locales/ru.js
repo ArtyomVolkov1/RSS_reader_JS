@@ -3,6 +3,8 @@ export default {
     languages: {
       ru: 'Русский',
     },
+    posts: 'Посты',
+    feeds: 'Фиды',
     errors: {
       validation: {
         notValidUrl: 'Ссылка должна быть валидным URL',
