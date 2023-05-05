@@ -11,16 +11,14 @@ const parsePosts = (post) => {
   };
 };
 
-const parse = (rss, url, i18n, state) => {
+const parse = (rss, url) => {
   const parser = new DOMParser();
   const data = parser.parseFromString(rss, 'text/xml');
   const parseError = data.querySelector('parsererror');
   if (parseError) {
-    let errors = new Error(parseError.textContent);
-    errors = i18n.t('errors.validation.notRss');
-    // eslint-disable-next-line no-param-reassign
-    state.form.error = errors;
-    throw errors;
+    const error = new Error(parseError.textContent);
+    error.isParseError = true;
+    throw error;
   }
   const feedTitle = data.querySelector('title').textContent;
   const feedDescription = data.querySelector('description').textContent;
