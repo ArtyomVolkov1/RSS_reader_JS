@@ -3,15 +3,16 @@ export default {
     languages: {
       ru: 'Русский',
     },
-    posts: 'Посты',
-    feeds: 'Фиды',
+    titles: {
+      posts: 'Посты',
+      feeds: 'Фиды',
+    },
     errors: {
-      validation: {
-        notValidUrl: 'Ссылка должна быть валидным URL',
-        alreadyExists: 'RSS уже существует',
-        notRss: 'Ресурс не содержит валидный RSS',
-        fields: 'Это обязательное поле',
-      },
+      notValidUrl: 'Ссылка должна быть валидным URL',
+      alreadyExists: 'RSS уже существует',
+      notRss: 'Ресурс не содержит валидный RSS',
+      fields: 'Это обязательное поле',
+      unknown: 'Что-то пошло не так',
     },
     already: {
       successfully: 'RSS успешно загружен',
