@@ -27,8 +27,13 @@ const loadRss = (data, watchedState) => {
   watchedState.feeds.push(feed);
   addId(posts, feed.id);
   watchedState.posts.push(...posts);
-  console.log(watchedState.feeds);
-  console.log(watchedState.posts);
+};
+
+const handleError = (error) => {
+  if (error.isParseError) {
+    return 'notRss';
+  }
+  return error.message.key ?? 'unknown';
 };
 
 // const updateRss = (watchedState) => {};
@@ -36,8 +41,10 @@ const loadRss = (data, watchedState) => {
 export default () => {
   yup.setLocale({
     string: {
-      url: () => ({ key: 'errors.validation.notValidUrl' }),
-      notOneOf: () => ({ key: 'errors.validation.alreadyExists' }),
+      url: () => ({ key: 'notValidUrl' }),
+    },
+    mixed: {
+      notOneOf: () => ({ key: 'alreadyExists' }),
     },
   });
   const defaultLanguage = 'ru';
@@ -51,21 +58,19 @@ export default () => {
   const state = {
     form: {
       status: 'filling',
-      valid: false,
       error: null,
     },
     posts: [],
     feeds: [],
   };
   const i18n = i18next.createInstance();
-  i18n
-    .init({
-      lng: defaultLanguage,
-      debug: false,
-      resources,
-    })
+  i18n.init({
+    lng: defaultLanguage,
+    debug: false,
+    resources,
+  })
     .then(() => {
-      const validater = (field) => yup.string().required().url().notOneOf(field);
+      const validater = (field) => yup.string().url().notOneOf(field);
       const watchedState = render(state, i18n, elements);
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -73,22 +78,23 @@ export default () => {
         const schema = validater(addedLink);
         const formData = new FormData(e.target);
         const input = formData.get('url');
-        schema.validate(input)
+        schema
+          .validate(input)
           .then(() => {
+            watchedState.form.status = 'valid';
             watchedState.form.error = null;
-            watchedState.form.valid = true;
             return getData(input);
           })
           .then((response) => {
-            const data = parse(response.data.contents, input, i18n, watchedState);
-            console.log(data);
+            // watchedState.form.status = 'valid';
+            const data = parse(response.data.contents, input);
+            watchedState.form.status = 'added';
             loadRss(data, watchedState);
-            watchedState.form.valid = true;
           })
-          .catch((err) => {
-            const validationErrors = err.errors.map((error) => i18n.t(error.key));
-            watchedState.form.valid = false;
-            watchedState.form.error = validationErrors;
+          .catch((error) => {
+            // const validationErrors = error.errors.map((err) => i18n.t(err.key));
+            // err.errors.map((error) => i18n.t(error.key))
+            watchedState.form.error = handleError(error);
           });
       });
     });
