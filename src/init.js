@@ -9,6 +9,7 @@ import parse from './parser.js';
 
 const getData = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
+  console.log(proxyUrl)
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
   return axios.get(proxyUrl);
@@ -32,6 +33,9 @@ const loadRss = (data, watchedState) => {
 const handleError = (error) => {
   if (error.isParseError) {
     return 'notRss';
+  } 
+  if (error.request) {
+    return 'networkError';
   }
   return error.message.key ?? 'unknown';
 };
@@ -86,7 +90,6 @@ export default () => {
             return getData(input);
           })
           .then((response) => {
-            // watchedState.form.status = 'valid';
             const data = parse(response.data.contents, input);
             watchedState.form.status = 'added';
             loadRss(data, watchedState);
