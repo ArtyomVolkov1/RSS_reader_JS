@@ -13,6 +13,7 @@ export default {
       notRss: 'Ресурс не содержит валидный RSS',
       fields: 'Это обязательное поле',
       unknown: 'Что-то пошло не так',
+      networkError: 'Ошибка сети',
     },
     already: {
       successfully: 'RSS успешно загружен',
