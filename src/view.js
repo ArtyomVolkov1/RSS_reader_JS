@@ -29,7 +29,7 @@ const renderPost = (state) => {
       'justify-content-between',
       'align-items-start',
       'border-0',
-      'border-end-0'
+      'border-end-0',
     );
     const a = document.createElement('a');
     a.setAttribute('href', post.link);
@@ -44,80 +44,59 @@ const renderPost = (state) => {
   return posts;
 };
 
+const createPostList = (state, i18n, elements) => {
+  const { divPosts } = elements;
+  const cardBorderPost = document.createElement('div');
+  cardBorderPost.classList.add('card', 'border-0');
+  divPosts.append(cardBorderPost);
+  const cardBodyPost = document.createElement('div');
+  cardBodyPost.classList.add('card-body');
+  cardBorderPost.append(cardBodyPost);
+  const postTitle = document.createElement('h2');
+  postTitle.classList.add('card-title', 'h4');
+  postTitle.textContent = i18n.t('titles.posts');
+  cardBodyPost.append(postTitle);
+  const postList = document.createElement('ul');
+  postList.classList.add('list-group', 'border-0', 'rounded-0');
+  cardBorderPost.append(postList);
+  postList.append(...renderPost(state));
+  return cardBorderPost;
+};
+
+const createFeedList = (state, i18n, elements) => {
+  const { divFeeds } = elements;
+  const cardBorderFeeds = document.createElement('div');
+  cardBorderFeeds.classList.add('card', 'border-0');
+  divFeeds.append(cardBorderFeeds);
+  const cardBodyFeeds = document.createElement('div');
+  cardBodyFeeds.classList.add('card-body');
+  cardBorderFeeds.append(cardBodyFeeds);
+  const feedTitle = document.createElement('h2');
+  feedTitle.classList.add('card-title', 'h4');
+  feedTitle.textContent = i18n.t('titles.feeds');
+  cardBodyFeeds.append(feedTitle);
+  const feedList = document.createElement('ul');
+  feedList.classList.add('list-group', 'border-0', 'rounded-0');
+  cardBorderFeeds.append(feedList);
+  feedList.append(...renderFeed(state));
+  return cardBorderFeeds;
+};
+
 const render = (state, i18n, elements) => {
-  const { input, form, feedback, divPosts, divFeeds } = elements;
-
-  const renderPostList = () => {
-    divPosts.innerHTML = '';
-    const cardBorderPost = document.createElement('div');
-    cardBorderPost.classList.add('card', 'border-0');
-    divPosts.append(cardBorderPost);
-    const cardBodyPost = document.createElement('div');
-    cardBodyPost.classList.add('card-body');
-    cardBorderPost.append(cardBodyPost);
-    const postTitle = document.createElement('h2');
-    postTitle.classList.add('card-title', 'h4');
-    postTitle.textContent = i18n.t('titles.posts');
-    cardBodyPost.append(postTitle);
-    const postList = document.createElement('ul');
-    postList.classList.add('list-group', 'border-0', 'rounded-0');
-    cardBorderPost.append(postList);
-    return cardBorderPost;
-  };
-
-  const renderFeedList = () => {
-    divFeeds.innerHTML = '';
-    const cardBorderFeeds = document.createElement('div');
-    cardBorderFeeds.classList.add('card', 'border-0');
-    divFeeds.append(cardBorderFeeds);
-    const cardBodyFeeds = document.createElement('div');
-    cardBodyFeeds.classList.add('card-body');
-    cardBorderFeeds.append(cardBodyFeeds);
-    const feedTitle = document.createElement('h2');
-    feedTitle.classList.add('card-title', 'h4');
-    feedTitle.textContent = i18n.t('titles.feeds');
-    cardBodyFeeds.append(feedTitle);
-    const feedList = document.createElement('ul');
-    feedList.classList.add('list-group', 'border-0', 'rounded-0');
-    cardBorderFeeds.append(feedList);
-    return cardBorderFeeds;
-  };
-
-  // const createLists = (titleTypes) => {
-  //   const cardBorderFeeds = document.createElement('div');
-  //   cardBorderFeeds.classList.add('card', 'border-0');
-  //   divFeeds.append(cardBorderFeeds);
-  //   const cardBodyFeeds = document.createElement('div');
-  //   cardBodyFeeds.classList.add('card-body');
-  //   cardBorderFeeds.append(cardBodyFeeds);
-  //   const feedTitle = document.createElement('h2');
-  //   feedTitle.classList.add('card-title', 'h4');
-  //   feedTitle.textContent = i18n.t(`titles.${titleTypes}`);
-  //   cardBodyFeeds.append(feedTitle);
-  //   const feedList = document.createElement('ul');
-  //   feedList.classList.add('list-group', 'border-0', 'rounded-0');
-  //   cardBorderFeeds.append(feedList);
-  //   switch (titleTypes) {
-  //     case 'posts':
-  //       feedList.append(...renderPost(state));
-  //       break;
-  //     case 'feeds':
-  //       feedList.append(...renderFeed(state));
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  //   return cardBorderFeeds;
-  // };
+  const {
+    input, form, feedback, divPosts, divFeeds,
+  } = elements;
 
   const renderPosts = () => {
-    const ul = document.querySelectorAll('.list-group')[0];
-    ul.append(...renderPost(state));
+    divPosts.innerHTML = '';
+    const posts = createPostList(state, i18n, elements);
+    divPosts.append(posts);
   };
 
   const renderFeeds = () => {
-    const ul = document.querySelectorAll('.list-group')[1];
-    ul.append(...renderFeed(state));
+    divFeeds.innerHTML = '';
+    const feeds = createFeedList(state, i18n, elements);
+    divFeeds.append(feeds);
   };
   const renderError = () => {
     if (state.form.error === null) {
@@ -145,8 +124,6 @@ const render = (state, i18n, elements) => {
   const renderStatus = () => {
     switch (state.form.status) {
       case 'added':
-        renderFeedList();
-        renderPostList();
         renderAdded();
         break;
       case 'valid':
