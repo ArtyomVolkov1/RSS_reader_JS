@@ -1,46 +1,55 @@
+/* eslint-disable no-param-reassign */
 import 'bootstrap';
 import * as yup from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
+import { uniqueId, differenceBy } from 'lodash';
 import resources from './locales/index.js';
 import render from './view.js';
 import parse from './parser.js';
 
 const getData = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
-  console.log(proxyUrl)
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
   return axios.get(proxyUrl);
 };
-const addId = (posts, feedId) => {
-  posts.forEach((post) => {
-    const editedPost = post;
-    editedPost.id = uniqueId();
-    editedPost.feedId = feedId;
-    return editedPost;
-  });
-};
+
 const loadRss = (data, watchedState) => {
-  const { posts, feed } = data;
-  feed.id = uniqueId();
+  const { feed, posts } = data;
+  const feedsId = uniqueId();
+  feed.id = feedsId;
+  posts.forEach((post) => {
+    post.id = uniqueId();
+    post.feedId = feed.id;
+  });
   watchedState.feeds.push(feed);
-  addId(posts, feed.id);
   watchedState.posts.push(...posts);
 };
-
 const handleError = (error) => {
   if (error.isParseError) {
     return 'notRss';
-  } 
+  }
   if (error.request) {
     return 'networkError';
   }
   return error.message.key ?? 'unknown';
 };
 
-// const updateRss = (watchedState) => {};
+const updateRss = (watchedState) => {
+  const promises = watchedState.feeds.map((feed) => getData(feed.link).then((response) => {
+    const { posts } = parse(response.data.contents);
+    const postFromState = watchedState.posts.filter((post) => post.feedId === feed.id);
+    const newPosts = differenceBy(posts, postFromState, 'link');
+    newPosts.forEach((post) => {
+      post.id = uniqueId();
+      post.feedId = feed.id;
+    });
+    watchedState.posts.unshift(...newPosts);
+    return console.log(newPosts);
+  }));
+  return Promise.all(promises).then(() => { setTimeout(updateRss, 5000, watchedState); });
+};
 
 export default () => {
   yup.setLocale({
@@ -68,14 +77,16 @@ export default () => {
     feeds: [],
   };
   const i18n = i18next.createInstance();
-  i18n.init({
-    lng: defaultLanguage,
-    debug: false,
-    resources,
-  })
+  i18n
+    .init({
+      lng: defaultLanguage,
+      debug: false,
+      resources,
+    })
     .then(() => {
       const validater = (field) => yup.string().url().notOneOf(field);
       const watchedState = render(state, i18n, elements);
+      watchedState.form.status = 'filling';
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
         const addedLink = watchedState.feeds.map((feed) => feed.link);
@@ -91,15 +102,14 @@ export default () => {
           })
           .then((response) => {
             const data = parse(response.data.contents, input);
-            watchedState.form.status = 'added';
             loadRss(data, watchedState);
+            watchedState.form.status = 'added';
           })
           .catch((error) => {
-            // const validationErrors = error.errors.map((err) => i18n.t(err.key));
-            // err.errors.map((error) => i18n.t(error.key))
             watchedState.form.error = handleError(error);
           });
       });
+
+      updateRss(watchedState);
     });
-  // updateRss(watchedState);
 };
