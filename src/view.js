@@ -126,7 +126,8 @@ const renderError = (state, i18n, elements) => {
 };
 
 const renderAdded = (i18n, elements) => {
-  const { feedback, input } = elements;
+  const { feedback, input, submit } = elements;
+  submit.disabled = false;
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
@@ -135,7 +136,8 @@ const renderAdded = (i18n, elements) => {
 };
 
 const clearErrors = (elements) => {
-  const { feedback } = elements;
+  const { feedback, submit } = elements;
+  submit.disabled = true;
   feedback.textContent = '';
 };
 
