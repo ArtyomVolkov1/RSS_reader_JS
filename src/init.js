@@ -57,6 +57,7 @@ export default () => {
   yup.setLocale({
     string: {
       url: () => ({ key: 'notValidUrl' }),
+      required: () => ({ key: 'fields' }),
     },
     mixed: {
       notOneOf: () => ({ key: 'alreadyExists' }),
@@ -94,7 +95,7 @@ export default () => {
           viewedPost: new Set(),
         },
       };
-      const validater = (field) => yup.string().url().notOneOf(field);
+      const validater = (field) => yup.string().required().url().notOneOf(field);
       const watchedState = onChange(state, render(state, i18n, elements));
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
