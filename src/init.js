@@ -37,7 +37,7 @@ const handleError = (error) => {
   return error.message.key ?? 'unknown';
 };
 
-const updateRss = (watchedState) => {
+const updateRss = async (watchedState) => {
   const promises = watchedState.feeds.map((feed) => getData(feed.link).then((response) => {
     const { posts } = parse(response.data.contents);
     const postFromState = watchedState.posts.filter((post) => post.feedId === feed.id);
@@ -49,7 +49,8 @@ const updateRss = (watchedState) => {
     watchedState.posts.unshift(...newPosts);
     return newPosts;
   }));
-  return Promise.all(promises).then(() => { setTimeout(updateRss, 5000, watchedState); });
+  await Promise.all(promises);
+  setTimeout(updateRss, 5000, watchedState);
 };
 
 export default () => {
