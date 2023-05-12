@@ -74,7 +74,7 @@ const createPostList = (state, i18n, elements) => {
   const postList = document.createElement('ul');
   postList.classList.add('list-group', 'border-0', 'rounded-0');
   cardBorderPost.append(postList);
-  postList.append(...createPostsrc/view.js(state, i18n));
+  postList.append(...createPost(state, i18n));
   return cardBorderPost;
 };
 
