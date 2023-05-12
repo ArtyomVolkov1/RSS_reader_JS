@@ -1,7 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import onChange from 'on-change';
-
-const renderFeed = (state) => {
+const createFeed = (state) => {
   const feeds = [];
   state.feeds.forEach((feed) => {
     const li = document.createElement('li');
@@ -19,7 +17,18 @@ const renderFeed = (state) => {
   return feeds;
 };
 
-const renderPost = (state) => {
+const createButton = (post, i18n) => {
+  const button = document.createElement('button');
+  button.setAttribute('type', 'button');
+  button.setAttribute('data-id', post.id);
+  button.setAttribute('data-bs-toggle', 'modal');
+  button.setAttribute('data-bs-target', '#modal');
+  button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+  button.textContent = i18n.t('button.click');
+  return button;
+};
+
+const createPost = (state, i18n) => {
   const posts = [];
   state.posts.forEach((post) => {
     const li = document.createElement('li');
@@ -36,9 +45,15 @@ const renderPost = (state) => {
     a.setAttribute('data-id', post.id);
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
-    a.classList.add('fw-bold');
+    if (state.uiState.viewedPost.has(post.id)) {
+      a.classList.add('fw-normal');
+    } else {
+      a.classList.add('fw-bold');
+    }
     a.textContent = post.title;
+    const button = createButton(post, i18n);
     li.append(a);
+    li.append(button);
     posts.push(li);
   });
   return posts;
@@ -59,7 +74,7 @@ const createPostList = (state, i18n, elements) => {
   const postList = document.createElement('ul');
   postList.classList.add('list-group', 'border-0', 'rounded-0');
   cardBorderPost.append(postList);
-  postList.append(...renderPost(state));
+  postList.append(...createPostsrc/view.js(state, i18n));
   return cardBorderPost;
 };
 
@@ -78,81 +93,96 @@ const createFeedList = (state, i18n, elements) => {
   const feedList = document.createElement('ul');
   feedList.classList.add('list-group', 'border-0', 'rounded-0');
   cardBorderFeeds.append(feedList);
-  feedList.append(...renderFeed(state));
+  feedList.append(...createFeed(state));
   return cardBorderFeeds;
 };
 
-const render = (state, i18n, elements) => {
-  const {
-    input, form, feedback, divPosts, divFeeds,
-  } = elements;
+const renderPosts = (state, i18n, elements) => {
+  const { divPosts } = elements;
+  divPosts.innerHTML = '';
+  const posts = createPostList(state, i18n, elements);
+  divPosts.append(posts);
+};
 
-  const renderPosts = () => {
-    divPosts.innerHTML = '';
-    const posts = createPostList(state, i18n, elements);
-    divPosts.append(posts);
-  };
+const renderFeeds = (state, i18n, elements) => {
+  const { divFeeds } = elements;
+  divFeeds.innerHTML = '';
+  const feeds = createFeedList(state, i18n, elements);
+  divFeeds.append(feeds);
+};
 
-  const renderFeeds = () => {
-    divFeeds.innerHTML = '';
-    const feeds = createFeedList(state, i18n, elements);
-    divFeeds.append(feeds);
-  };
-  const renderError = () => {
-    if (state.form.error === null) {
-      return;
-    }
-    feedback.classList.remove('text-success');
-    feedback.classList.add('text-danger');
-    input.classList.add('is-invalid');
-    input.style.border = '$danger';
-    feedback.textContent = i18n.t(`errors.${state.form.error}`);
-    form.reset();
-    input.focus();
-  };
-  const renderAdded = () => {
-    input.classList.remove('is-invalid');
-    feedback.classList.remove('text-danger');
-    feedback.classList.add('text-success');
-    feedback.textContent = i18n.t('already.successfully');
-    input.style.border = null;
-  };
-  const clearErrors = () => {
-    feedback.textContent = '';
-  };
+const renderError = (state, i18n, elements) => {
+  const { feedback, input, form } = elements;
+  if (state.form.error === null) {
+    return;
+  }
+  feedback.classList.remove('text-success');
+  feedback.classList.add('text-danger');
+  input.classList.add('is-invalid');
+  input.style.border = '$danger';
+  feedback.textContent = i18n.t(`errors.${state.form.error}`);
+  form.reset();
+  input.focus();
+};
 
-  const renderStatus = () => {
-    switch (state.form.status) {
-      case 'added':
-        renderAdded();
-        break;
-      case 'valid':
-        clearErrors();
-        break;
-      default:
-        break;
-    }
-  };
+const renderAdded = (i18n, elements) => {
+  const { feedback, input } = elements;
+  input.classList.remove('is-invalid');
+  feedback.classList.remove('text-danger');
+  feedback.classList.add('text-success');
+  feedback.textContent = i18n.t('already.successfully');
+  input.style.border = null;
+};
 
-  const watchedState = onChange(state, (path) => {
-    switch (path) {
-      case 'form.status':
-        renderStatus();
-        break;
-      case 'form.error':
-        renderError();
-        break;
-      case 'posts':
-        renderPosts();
-        break;
-      case 'feeds':
-        renderFeeds();
-        break;
-      default:
-        break;
-    }
-  });
-  return watchedState;
+const clearErrors = (elements) => {
+  const { feedback } = elements;
+  feedback.textContent = '';
+};
+
+const renderStatus = (state, i18n, elements) => {
+  switch (state.form.status) {
+    case 'added':
+      renderAdded(i18n, elements);
+      break;
+    case 'valid':
+      clearErrors(elements);
+      break;
+    default:
+      break;
+  }
+};
+
+const renderModalWindow = (state, elements, id) => {
+  const { modalHeader, modalBody, modalFooter } = elements;
+  const aEl = document.querySelector(`[data-id="${id}"]`);
+  aEl.classList.remove('fw-bold');
+  aEl.classList.add('fw-normal');
+  const selectedPost = state.posts.find((post) => post.id === id);
+  modalHeader.textContent = selectedPost.title;
+  modalBody.textContent = selectedPost.description;
+  modalFooter.setAttribute('href', `${selectedPost.link}`);
+};
+
+const render = (state, i18n, elements) => (path, value) => {
+  switch (path) {
+    case 'form.status':
+      renderStatus(state, i18n, elements);
+      break;
+    case 'form.error':
+      renderError(state, i18n, elements);
+      break;
+    case 'posts':
+      renderPosts(state, i18n, elements);
+      break;
+    case 'feeds':
+      renderFeeds(state, i18n, elements);
+      break;
+    case 'uiState.selectedPost':
+      renderModalWindow(state, elements, value);
+      break;
+    default:
+      break;
+  }
 };
 
 export default render;
