@@ -112,7 +112,7 @@ const renderFeeds = (state, i18n, elements) => {
 };
 
 const renderError = (state, i18n, elements) => {
-  const { feedback, input, form } = elements;
+  const { feedback, input } = elements;
   if (state.form.error === null) {
     return;
   }
@@ -121,18 +121,18 @@ const renderError = (state, i18n, elements) => {
   input.classList.add('is-invalid');
   input.style.border = '$danger';
   feedback.textContent = i18n.t(`errors.${state.form.error}`);
-  form.reset();
-  input.focus();
 };
 
 const renderAdded = (i18n, elements) => {
-  const { feedback, input, submit } = elements;
+  const { feedback, input, submit, form } = elements;
   submit.disabled = false;
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
   feedback.textContent = i18n.t('already.successfully');
   input.style.border = null;
+  form.reset();
+  input.focus();
 };
 
 const clearErrors = (elements) => {
