@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import onChange from 'on-change';
 import 'bootstrap';
 import * as yup from 'yup';
 import i18next from 'i18next';
@@ -46,7 +47,7 @@ const updateRss = (watchedState) => {
       post.feedId = feed.id;
     });
     watchedState.posts.unshift(...newPosts);
-    return console.log(newPosts);
+    return newPosts;
   }));
   return Promise.all(promises).then(() => { setTimeout(updateRss, 5000, watchedState); });
 };
@@ -67,14 +68,9 @@ export default () => {
     feedback: document.querySelector('.feedback'),
     divPosts: document.querySelector('.posts'),
     divFeeds: document.querySelector('.feeds'),
-  };
-  const state = {
-    form: {
-      status: 'filling',
-      error: null,
-    },
-    posts: [],
-    feeds: [],
+    modalHeader: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalFooter: document.querySelector('.full-article'),
   };
   const i18n = i18next.createInstance();
   i18n
@@ -84,9 +80,20 @@ export default () => {
       resources,
     })
     .then(() => {
+      const state = {
+        form: {
+          status: 'filling',
+          error: null,
+        },
+        posts: [],
+        feeds: [],
+        uiState: {
+          selectedPost: null,
+          viewedPost: new Set(),
+        },
+      };
       const validater = (field) => yup.string().url().notOneOf(field);
-      const watchedState = render(state, i18n, elements);
-      watchedState.form.status = 'filling';
+      const watchedState = onChange(state, render(state, i18n, elements));
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
         const addedLink = watchedState.feeds.map((feed) => feed.link);
@@ -108,6 +115,14 @@ export default () => {
           .catch((error) => {
             watchedState.form.error = handleError(error);
           });
+      });
+
+      elements.divPosts.addEventListener('click', (e) => {
+        const { dataset: { id } } = e.target;
+        if (id) {
+          watchedState.uiState.viewedPost.add(id);
+          watchedState.uiState.selectedPost = id;
+        }
       });
 
       updateRss(watchedState);
