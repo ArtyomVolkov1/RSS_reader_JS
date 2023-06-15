@@ -9,11 +9,11 @@ import resources from './locales/index.js';
 import render from './view.js';
 import parse from './parser.js';
 
-const getData = (url) => {
+const proxy = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
-  return axios.get(proxyUrl);
+  return proxyUrl;
 };
 
 const preparingDataStorage = (data, watchedState) => {
@@ -39,7 +39,7 @@ const handleError = (error) => {
 };
 
 const updateRss = async (watchedState) => {
-  const promises = watchedState.feeds.map((feed) => getData(feed.link).then((response) => {
+  const promises = watchedState.feeds.map((feed) => axios.get(proxy(feed.link)).then((response) => {
     const { posts } = parse(response.data.contents);
     const postFromState = watchedState.posts.filter((post) => post.feedId === feed.id);
     const newPosts = differenceBy(posts, postFromState, 'link');
@@ -110,7 +110,7 @@ export default () => {
           .then(() => {
             watchedState.form.status = 'valid';
             watchedState.form.error = null;
-            return getData(input);
+            return axios.get(proxy(input));
           })
           .then((response) => {
             const data = parse(response.data.contents, input);
@@ -122,7 +122,7 @@ export default () => {
           });
       });
 
-      elements.divPosts.addEventListener('click', (e) => {
+      elements.postsContainer.addEventListener('click', (e) => {
         const {
           dataset: { id },
         } = e.target;
