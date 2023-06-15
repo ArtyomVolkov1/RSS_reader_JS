@@ -16,7 +16,7 @@ const getData = (url) => {
   return axios.get(proxyUrl);
 };
 
-const loadRss = (data, watchedState) => {
+const preparingDataStorage = (data, watchedState) => {
   const { feed, posts } = data;
   const feedsId = uniqueId();
   feed.id = feedsId;
@@ -27,6 +27,7 @@ const loadRss = (data, watchedState) => {
   watchedState.feeds.push(feed);
   watchedState.posts.push(...posts);
 };
+
 const handleError = (error) => {
   if (error.isParseError) {
     return 'notRss';
@@ -69,12 +70,13 @@ export default () => {
     input: document.querySelector('#url-input'),
     submit: document.querySelector('[type="submit"]'),
     feedback: document.querySelector('.feedback'),
-    divPosts: document.querySelector('.posts'),
-    divFeeds: document.querySelector('.feeds'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
     modalHeader: document.querySelector('.modal-title'),
     modalBody: document.querySelector('.modal-body'),
     modalFooter: document.querySelector('.full-article'),
   };
+
   const i18n = i18next.createInstance();
   i18n
     .init({
@@ -112,7 +114,7 @@ export default () => {
           })
           .then((response) => {
             const data = parse(response.data.contents, input);
-            loadRss(data, watchedState);
+            preparingDataStorage(data, watchedState);
             watchedState.form.status = 'added';
           })
           .catch((error) => {
@@ -121,7 +123,9 @@ export default () => {
       });
 
       elements.divPosts.addEventListener('click', (e) => {
-        const { dataset: { id } } = e.target;
+        const {
+          dataset: { id },
+        } = e.target;
         if (id) {
           watchedState.uiState.viewedPost.add(id);
           watchedState.uiState.selectedPost = id;
