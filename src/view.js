@@ -60,10 +60,10 @@ const createPost = (state, i18n) => {
 };
 
 const createPostList = (state, i18n, elements) => {
-  const { divPosts } = elements;
+  const { postsContainer } = elements;
   const cardBorderPost = document.createElement('div');
   cardBorderPost.classList.add('card', 'border-0');
-  divPosts.append(cardBorderPost);
+  postsContainer.append(cardBorderPost);
   const cardBodyPost = document.createElement('div');
   cardBodyPost.classList.add('card-body');
   cardBorderPost.append(cardBodyPost);
@@ -79,10 +79,10 @@ const createPostList = (state, i18n, elements) => {
 };
 
 const createFeedList = (state, i18n, elements) => {
-  const { divFeeds } = elements;
+  const { feedsContainer } = elements;
   const cardBorderFeeds = document.createElement('div');
   cardBorderFeeds.classList.add('card', 'border-0');
-  divFeeds.append(cardBorderFeeds);
+  feedsContainer.append(cardBorderFeeds);
   const cardBodyFeeds = document.createElement('div');
   cardBodyFeeds.classList.add('card-body');
   cardBorderFeeds.append(cardBodyFeeds);
@@ -98,17 +98,17 @@ const createFeedList = (state, i18n, elements) => {
 };
 
 const renderPosts = (state, i18n, elements) => {
-  const { divPosts } = elements;
-  divPosts.innerHTML = '';
+  const { postsContainer } = elements;
+  postsContainer.innerHTML = '';
   const posts = createPostList(state, i18n, elements);
-  divPosts.append(posts);
+  postsContainer.append(posts);
 };
 
 const renderFeeds = (state, i18n, elements) => {
-  const { divFeeds } = elements;
-  divFeeds.innerHTML = '';
+  const { feedsContainer } = elements;
+  feedsContainer.innerHTML = '';
   const feeds = createFeedList(state, i18n, elements);
-  divFeeds.append(feeds);
+  feedsContainer.append(feeds);
 };
 
 const renderError = (state, i18n, elements) => {
