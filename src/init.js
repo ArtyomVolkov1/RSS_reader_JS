@@ -97,23 +97,23 @@ export default () => {
           viewedPost: new Set(),
         },
       };
-      const validater = (field) => yup.string().required().url().notOneOf(field);
+      const validater = (urls) => yup.string().required().url().notOneOf(urls);
       const watchedState = onChange(state, render(state, i18n, elements));
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
         const addedLink = watchedState.feeds.map((feed) => feed.link);
         const schema = validater(addedLink);
         const formData = new FormData(e.target);
-        const input = formData.get('url');
+        const userLink = formData.get('url');
         schema
-          .validate(input)
+          .validate(userLink)
           .then(() => {
             watchedState.form.status = 'valid';
             watchedState.form.error = null;
-            return axios.get(proxy(input));
+            return axios.get(proxy(userLink));
           })
           .then((response) => {
-            const data = parse(response.data.contents, input);
+            const data = parse(response.data.contents, userLink);
             preparingDataStorage(data, watchedState);
             watchedState.form.status = 'added';
           })
