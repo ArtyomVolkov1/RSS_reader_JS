@@ -119,7 +119,6 @@ const renderError = (state, i18n, elements) => {
   feedback.classList.remove('text-success');
   feedback.classList.add('text-danger');
   input.classList.add('is-invalid');
-  input.style.border = '$danger';
   feedback.textContent = i18n.t(`errors.${state.form.error}`);
 };
 
@@ -132,7 +131,6 @@ const renderAdded = (i18n, elements) => {
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
   feedback.textContent = i18n.t('already.successfully');
-  input.style.border = null;
   form.reset();
   input.focus();
 };
