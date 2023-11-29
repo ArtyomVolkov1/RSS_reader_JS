@@ -4,10 +4,12 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/d79a1b5123bb27e503f0/maintainability)](https://codeclimate.com/github/ArtyomVolkov1/frontend-project-11/maintainability)
 
-## Description
-RSS is a specialized format designed to describe news feeds, announcements of articles and other materials.
+RSS — специализированный формат, предназначенный для описания лент новостей, анонсов статей и других материалов.
 
-## Preview
+## 🛠 Tech Stack
+**Client:** JavaScript, MVC, DOM API, axios, webpack, Bootstrap
+
+## 🔭 Preview
 https://frontend-project-11-smoky-six.vercel.app/
 
 ## Requirements
